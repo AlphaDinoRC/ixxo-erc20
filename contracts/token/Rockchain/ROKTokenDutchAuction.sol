@@ -1,26 +1,8 @@
-pragma solidity 0.4.10;
+pragma solidity 0.4.8;
+import "./ROKVestedToken.sol";
 
-
-/// @title Abstract token contract - Functions to be implemented by token contracts.
-contract Token {
-    function transfer(address to, uint256 value) returns (bool success);
-    function transferFrom(address from, address to, uint256 value) returns (bool success);
-    function approve(address spender, uint256 value) returns (bool success);
-
-    // This is not an abstract function, because solc won't recognize generated getter functions for public variables as functions.
-    function totalSupply() constant returns (uint256 supply) {}
-    function balanceOf(address owner) constant returns (uint256 balance);
-    function allowance(address owner, address spender) constant returns (uint256 remaining);
-
-    event Transfer(address indexed from, address indexed to, uint256 value);
-    event Approval(address indexed owner, address indexed spender, uint256 value);
-}
-
-
-/// @title Time limit Dutch auction contract - distribution of Rockchain tokens using a dutch auction limited in time
-/// @author Sebastien Jehan - <sebastien.jehan@rockchain.org>
-contract TimeLimitDutchAuction {
-
+contract ROKTokenDutchAuction
+{
     /*
      *  Events
      */
@@ -29,14 +11,15 @@ contract TimeLimitDutchAuction {
     /*
      *  Constants
      */
-	uint constant public MAX_BLOCK_COUNT = 100000; // Auction ends after 100K blocks (around 17 days)
+
+    uint constant public MAX_BLOCK_COUNT = 100000; // Auction ends after 100K blocks (around 17 days)
     uint constant public MAX_TOKENS_SOLD = 50000000 * 10**18; // 50M
     uint constant public WAITING_PERIOD_BEFORE_TRADING = 7 days;
 
     /*
      *  Storage
      */
-    Token public rockchainToken;
+    ROKVestedToken public rockchainToken;
     address public wallet;
     address public owner;
     uint public ceiling;
@@ -60,9 +43,6 @@ contract TimeLimitDutchAuction {
         TradingStarted
     }
 
-    /*
-     *  Modifiers
-     */
     modifier atStage(Stages _stage) {
         if (stage != _stage)
             // Contract not in expected state
@@ -77,7 +57,7 @@ contract TimeLimitDutchAuction {
         _;
     }
 
-    modifier isWallet() {
+     modifier isWallet() {
         if (msg.sender != wallet)
             // Only wallet is allowed to proceed
             throw;
@@ -126,7 +106,7 @@ contract TimeLimitDutchAuction {
         if (_rockchainToken == 0)
             // Argument is null.
             throw;
-        rockchainToken = Token(_rockchainToken);
+        rockchainToken = ROKVestedToken(_rockchainToken);
         // Validate token balance
         if (rockchainToken.balanceOf(this) != MAX_TOKENS_SOLD)
             throw;
