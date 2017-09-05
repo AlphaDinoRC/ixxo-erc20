@@ -15,21 +15,21 @@ import './PullPayment.sol';
 contract Crowdsale is Pausable, PullPayment{
   using SafeMath for uint256;
 
-  ROKToken public rok;
   address public owner;
-  address public escrow;                  // Address of Escrow Provider Wallet
-  address public bounty;                      // Address dedicated for bounty services
-  address public team;                        // Adress for ROK token allocated to the team
-  uint public rok_team;                       // ROK amount dedicated to the team
-  uint public rateETH_USD;                    // final rate based on the ratio described on our White paper
-  uint public rateETH_ROK;                   // rate Ether per ROK token
-  uint public maxFundingGoal;                // Maximum goal in Ether raised
-  uint public minFundingGoal;               // Minimum funding goal in Ether raised
-  uint public startDate;			       //Starting time of Crowsd Sale
-  uint public maxROKsupply;
-  uint public deadline;
-  uint public savedBalance;           //  Total amount raised in ETH
-  uint public savedBalanceToken;      // Total ROK Token allocated
+  ROKToken public rok;
+  address public constant escrow = 0x0;                  // Address of Escrow Provider Wallet -- to Replace
+  address public constant bounty = 0x0;                      // Address dedicated for bounty services  -- to Replace
+  address public constant team = 0x0;                        // Address for ROK token allocated to the team -- to Replace
+  address public constant token = 0x0;                      // Address of the ROk Token -- to Replace
+  uint public constant rateETH_USD = 1;                    // final rate based on the ratio described on our White paper -- to Replace 48H before ICO
+  uint public constant rateETH_ROK = 1000;                   // rate Ether per ROK token -- to Replace 48H before ICO
+  uint public constant maxFundingGoal = 100000;                // Maximum goal in Ether raised -- to Replace 48H before ICO based on rateETH_ROK
+  uint public constant minFundingGoal = 22000;               // Minimum funding goal in Ether raised -- to Replace 48H before ICO based on rateETH_ROK
+  uint public constant startDate = 1509534000;			       // epoch timestamp representing the start date (1st november 2017 11:00 gmt)
+  uint public constant maxROKsupply = 100000000;          //Maximum ROK token to produce
+  uint public constant deadline = 1512126000;               // epoch timestamp representing the end date (1st december 2017 11:00 gmt)
+  uint public savedBalance = 0;           //  Total amount raised in ETH
+  uint public savedBalanceToken = 0;      // Total ROK Token allocated
   bool public ownerPaid = false;     //Has the owner been paid?
 
   mapping(address => uint) balances;			//Balances in incoming Ether
@@ -60,21 +60,9 @@ contract Crowdsale is Pausable, PullPayment{
 	    );
 
   //Initialization
-  function Crowdsale(uint rate){
+  function Crowdsale(){
     owner = msg.sender;
-    rok = ROKToken(0x0);                           //add address of the specific contract -- to Replace
-    escrow = 0x0;                          //add address of the multisg wallet
-    bounty = 0x0;                               //add address of the bounty wallet
-    team = 0x0;                                 //add address of the team wallet
-    rateETH_USD = rate;                         //Set 48H before ICO launch
-    rateETH_ROK = rateETH_USD.mul(1000);        // Rate allowing to calculate the number of ETH per ROK
-    maxFundingGoal = rateETH_USD.mul(100000);   // maximum amount of Ether raised depending on the final rate and respecting the minimum goal to reach 6.3M $
-    minFundingGoal = rateETH_USD.mul(18000);    // minimum amount of Ether raised depending on the final rate and respecting the minimum goal to reach 35M $
-    maxROKsupply = 100000000;				// Maximum supply of ROK Tokens
-    startDate = 1509534000;               // epoch timestamp representing the start date (1st november 2017 11:00 gmt)
-    deadline = 1512126000;               // epoch timestamp representing the end date (1st december 2017 11:00 gmt)
-    savedBalanceToken = 0;
-    savedBalance = 0;
+    rok = ROKToken(token);
   }
 
 	//Default Function, delegates to contribute function (for ease of use)
@@ -174,17 +162,17 @@ contract Crowdsale is Pausable, PullPayment{
 		ownerPaid = true;										//Set flag to show owner has been paid.
 
     if(isSuccessful()){
-		require(escrow.transfer(this.balance));							//We were successful, so transfer the balance to the escrow address
+		escrow.transfer(this.balance);							//We were successful, so transfer the balance to the escrow address
     PayEther(escrow,this.balance,now);      				//Log the payout to escrow
 		require(rok.transfer(bounty,checkRokBounty()));			//And since successful, send Bounty tokens to the dedicated address
     PayTokens(bounty,checkRokBounty(),now);       			//Log payout of tokens to bounty
 	  payTokens();                                            // Pay all contributors
 	  payTeam();												// Pay team members
 		}else{                                                  //Once the refund is done
-        require(deadline + 45 days);            //Refund period to respect before finalizing
+        require(now > deadline + 45 days);            //Refund period to respect before finalizing
         require(rok.transfer(owner,tokenBalance()));			//We were not successful, so send ALL tokens back to owner.
         PayTokens(owner,tokenBalance(),now);       			    //Log payout of tokens to owner
-        require(team.transfer(this.balance));              //transfer the unrequested tokens to the team for vesting
+        team.transfer(this.balance);              //transfer the unrequested tokens to the team for vesting
         PayEther(team,this.balance,now);      				//Log the payout to team
 		}
 	}
