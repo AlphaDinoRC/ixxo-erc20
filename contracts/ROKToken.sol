@@ -3,7 +3,6 @@ pragma solidity ^0.4.11;
 
 import './SafeMath.sol';
 import './ERC20.sol';
-import './ReceivingContract.sol';
 
 contract ROKToken is ERC20 {
   using SafeMath for uint256;
@@ -23,7 +22,7 @@ contract ROKToken is ERC20 {
   event Approval(address indexed owner, address indexed spender, uint value);
   event Burn(address indexedburner, uint value);
 
-  
+
   function ROKToken() {
     initialSupply = 100000000; //100,000,000 ROK tokens
     totalSupply = initialSupply;
@@ -69,12 +68,6 @@ contract ROKToken is ERC20 {
     allowed[msg.sender][_spender] = _value;
     Approval(msg.sender, _spender, _value);
     return true;
-  }
-
-    /* Approve and then comunicate the approved contract in a single tx */
-  function approveRefund (address _spender, bytes _extraData){
-      ReceivingContract spender = ReceivingContract(_spender);
-      spender.refund(msg.sender, this, _extraData);
   }
 
   function allowance(address _owner, address _spender) constant returns (uint remaining) {
