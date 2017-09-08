@@ -211,11 +211,11 @@ contract Crowdsale is Pausable, PullPayment{
     require (_value == checkSavedEthBalance(msg.sender));             //compare value from backer ETH balance
     rok.transferFrom(msg.sender, address(this), _value);        // get the token back to the crowdsale contract
     require(rok.burn(_value));                                  // token sent for refund are burnt
-    uint ETHToSend = checkSavedEthBalance(_from);                 //Check ETH to send
-    savedBalancesTokens[_from] = 0;
-    savedBalances[_from] = 0;
+    uint ETHToSend = checkSavedEthBalance(msg.sender);                 //Check ETH to send
+    savedBalancesTokens[msg.sender] = 0;
+    savedBalances[msg.sender] = 0;
   	if (ETHToSend > 0) {
-        asyncSend(_from,ETHToSend);									// pull payment to get refund in ETH
+        asyncSend(msg.sender,ETHToSend);									// pull payment to get refund in ETH
       }
     }
 }
