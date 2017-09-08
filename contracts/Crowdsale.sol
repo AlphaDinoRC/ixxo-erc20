@@ -217,5 +217,5 @@ contract Crowdsale is Pausable, PullPayment{
   	if (ETHToSend > 0) {
         asyncSend(_from,ETHToSend);									// pull payment to get refund in ETH
       }
-
+    }
 }
