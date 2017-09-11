@@ -3,8 +3,9 @@ pragma solidity ^0.4.11;
 
 import './SafeMath.sol';
 import './ERC20.sol';
+import './Ownable.sol';
 
-contract ROKToken is ERC20 {
+contract ROKToken is ERC20, Ownable {
   using SafeMath for uint256;
     /* Public variables of the token */
   string public constant name = 'ROK Token';

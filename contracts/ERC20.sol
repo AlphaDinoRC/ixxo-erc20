@@ -1,8 +1,6 @@
 pragma solidity ^0.4.11;
 
 contract ERC20 {
-  uint public totalSupply;
-  
   function balanceOf(address who) constant returns (uint);
   function allowance(address owner, address spender) constant returns (uint);
   function transfer(address to, uint value) returns (bool ok);

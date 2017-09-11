@@ -5,6 +5,7 @@ import './SafeMath.sol';
 import './ROKToken.sol';
 import './Pausable.sol';
 import './PullPayment.sol';
+import './MultiSigWallet.sol';
 
 /*
 *  Crowdsale Smart Contract for the Rockchain project
@@ -17,13 +18,13 @@ contract Crowdsale is Pausable, PullPayment{
 
   address public owner;
   ROKToken public rok;
-  address public constant escrow = 0x4C495a21D911DeBA17720482eE6Cb0d09ba01f1F;                  // Address of Escrow Provider Wallet
+  address public escrow;                 // Address of Escrow Provider Wallet
   address public constant bounty = 0x0bBce8FC67D9c0832B62be036BCA4067258B58D9;                      // Address dedicated for bounty services
   address public constant team = 0xA92Aa953ddCAa748e085F612A9E1f6c50F600711;                        // Adress for ROK token allocated to the team
   uint public constant rateETH_USD = 1;                    // final rate based on the ratio described on our White paper
   uint public constant rateETH_ROK = 1000;                   // rate Ether per ROK token
-  uint public constant maxFundingGoal = 100000000;                // Maximum goal in Ether raised
-  uint public constant minFundingGoal = 22000000;               // Minimum funding goal in Ether raised
+  uint public constant maxFundingGoal = 100000;                // Maximum goal in Ether raised
+  uint public constant minFundingGoal = 18000;               // Minimum funding goal in Ether raised
   uint public constant startDate = 1509534000;			       // epoch timestamp representing the start date (1st november 2017 11:00 gmt)
   uint public constant deadline = 1512126000;               // epoch timestamp representing the end date (1st december 2017 11:00 gmt)
   uint public constant refundeadline = 1515927600;               // epoch timestamp representing the end date of refund period (14th january 2018 11:00 gmt)
@@ -59,20 +60,21 @@ contract Crowdsale is Pausable, PullPayment{
 	    );
 
   //Initialization
-  function Crowdsale(){
+  function Crowdsale(address _roktoken, address _escrow){
     owner = msg.sender;
-    rok = new ROKToken();                           //add address of the specific contract -- to Replace
+    rok = ROKToken(_roktoken);                           //add address of the specific contract
+    escrow = _escrow;
   }
 
 	//Default Function, delegates to contribute function (for ease of use)
 	//WARNING: Not compatible with smart contract invocation, will exceed gas stipend!
 	//Only use from full wallets.
-	function () payable {
+	function () payable whenNotPaused {
 		contribute();
 	}
 
     //Contribute Function, accepts incoming payments and tracks balances for each contributors
-	function contribute() payable whenNotPaused {
+	function contribute() payable {
 		require(isStarted());                      //Has the crowdsale even started yet?
 		require(this.balance <= maxFundingGoal);   //Does this payment send us over the max?
 		require(msg.value > 0);                    //Require that the incoming amount is different to 0
@@ -169,8 +171,8 @@ contract Crowdsale is Pausable, PullPayment{
       escrow.transfer(this.balance);							//We were successful, so transfer the balance to the escrow address
       PayEther(escrow,this.balance,now);      				//Log the payout to escrow
       require(rok.transfer(bounty,checkRokBounty()));			//And since successful, send Bounty tokens to the dedicated address
-      PayTokens(bounty,checkRokBounty(),now);       			//Log payout of tokens to bounty
       payTokens();                                            // Pay all contributors
+      PayTokens(bounty,checkRokBounty(),now);       			//Log payout of tokens to bounty
       payTeam();												// Pay team members
     }
 
@@ -218,4 +220,13 @@ contract Crowdsale is Pausable, PullPayment{
         asyncSend(msg.sender,ETHToSend);									// pull payment to get refund in ETH
       }
     }
+
+  function setMultiSigWallet(address newWallet) external {
+    require(msg.sender == escrow);
+
+    MultiSigWallet wallet = MultiSigWallet(newWallet);
+    require(wallet.isMultiSigWallet());
+    escrow = newWallet;
+ }
+
 }
