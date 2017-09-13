@@ -23,6 +23,7 @@ contract Crowdsale is Pausable, PullPayment{
   address public constant team = 0xA92Aa953ddCAa748e085F612A9E1f6c50F600711;                        // Adress for ROK token allocated to the team
   uint public constant rateETH_USD = 1;                    // final rate based on the ratio described on our White paper
   uint public constant rateETH_ROK = 1000;                   // rate Ether per ROK token
+  uint public constant minimumPurchase = 0.1 ether;	           //Minimum purchase size of incoming ETH
   uint public constant maxFundingGoal = 100000;                // Maximum goal in Ether raised
   uint public constant minFundingGoal = 18000;               // Minimum funding goal in Ether raised
   uint public constant startDate = 1509534000;			       // epoch timestamp representing the start date (1st november 2017 11:00 gmt)
@@ -77,8 +78,8 @@ contract Crowdsale is Pausable, PullPayment{
 	function contribute() payable {
 		require(isStarted());                      //Has the crowdsale even started yet?
 		require(this.balance <= maxFundingGoal);   //Does this payment send us over the max?
-		require(msg.value > 0);                    //Require that the incoming amount is different to 0
-		require(!isComplete()); 				   //Has the crowdsale completed? We only want to accept payments if we're still active.
+    require(msg.value >= minimumPurchase);              //Require that the incoming amount is at least the minimum purchase size.
+    require(!isComplete()); 				   //Has the crowdsale completed? We only want to accept payments if we're still active.
 		balances[msg.sender] += msg.value;         //If all checks good, then accept contribution and record new balance.
 		savedBalances[msg.sender] += msg.value;    //Save contributors balance in Ether for later in case of pay back
 		savedBalance += msg.value;				   //add the new total balance in Ether
@@ -167,7 +168,7 @@ contract Crowdsale is Pausable, PullPayment{
 	  }
 
     //Function to pay out
-  function payout() internal {
+  function payout() onlyOwner {
       escrow.transfer(this.balance);							//We were successful, so transfer the balance to the escrow address
       PayEther(escrow,this.balance,now);      				//Log the payout to escrow
       require(rok.transfer(bounty,checkRokBounty()));			//And since successful, send Bounty tokens to the dedicated address
@@ -201,9 +202,8 @@ contract Crowdsale is Pausable, PullPayment{
 	}
 
   /* When MIN_CAP is not reach:
-   * with this crowdsale contract on parameter with all the ROK they get in order to be refund
-   * 1) backer call the "approve" function of the  ROKToken contract with the amount of all ROK they got in order to be refund
-   * 2) backer call the "refund" function of the Crowdsale contract with the same amount of ROK
+   * 1) backer call the "approve" function of the  ROKToken contract with the amount of all all the ETH sent in order to be refund
+   * 2) backer call the "refund" function of the Crowdsale contract with the same amount of ETH sent
    * 3) backer call the "withdrawPayments" function of the Crowdsale contract to get a refund in ETH
    */
   function refund (uint _value) public {
