@@ -9,7 +9,7 @@ import './MultiSigWallet.sol';
 
 /*
 *  Crowdsale Smart Contract for the Rockchain project
-*  Author: Yosra Helal helal.yosra@gmail.com
+*  Author: Yosra Helal yosra.helal@rockchain.org
 *  Contributor: Christophe Ozcan christophe.ozcan@crypto4all.com
 */
 
@@ -220,13 +220,5 @@ contract Crowdsale is Pausable, PullPayment{
         asyncSend(msg.sender,ETHToSend);									// pull payment to get refund in ETH
       }
     }
-
-  function setMultiSigWallet(address newWallet) external {
-    require(msg.sender == escrow);
-
-    MultiSigWallet wallet = MultiSigWallet(newWallet);
-    require(wallet.isMultiSigWallet());
-    escrow = newWallet;
- }
 
 }
