@@ -9,9 +9,6 @@ We believe in the future emergence of cloud networks with both trusted component
 
 Crowdsale contract:
 
-Our crowdsale contract is defined in contracts/token/Rockchain/ROKTokenDutchAuction.sol
+Our crowdsale contract is defined in contracts/Crowdsale.sol
 
-The underlying token is defined in contracts/token/Rockchain/ROKVestedToken.sol
-
-
-
+The underlying token is defined in contracts/ROKToken.sol
