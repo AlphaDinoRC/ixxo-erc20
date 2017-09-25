@@ -44,8 +44,9 @@ Variable/Function | Purpose
 `maxFundingGoal`|The absolute maximum number of Ether that the ICO contract will accept, if this number if reached, the ICO will end immediately and be declared a success.
 `ROKtoken`|The Address of the ERC20 ROK Token Contract
 `Escrow`|The Address of our Escrow Provider. This is the hard-coded address that all final Ether will be sent to upon Successful completion of the ICO
-`Bounty`|The Address dedicated to bounty services. This is the hard-coded address that all final Ether will be sent to upon Successful completion of the ICO
+`Bounty`|The Hard-coded Address dedicated to bounty services. 
 `Owner`|This is the Address of the Owner Account. This is where the ROK Tokens will be sent when minted.
+`Team`|The Hard-coded Address dedicated to the team and advisors for their contributions. 
 `balances`|Ether Balance for each contributor, we can look back and determine what the balance was easily.
 `savedBalance`|The final Ether Balance of the Contract. This is saved so that once withdrawls happen, we can look back and determine what the balance was easily.
 `contribute()`|send in contribution (send ETH along with execution)
