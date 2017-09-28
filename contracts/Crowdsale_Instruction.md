@@ -6,7 +6,7 @@ The smart contract has a certain number of advanced features :
 - Implements the token distribution as described in the white paper
 - Allows funding in Ether
 - Allows full traceability of the contributions being in ETH and the corresponding ROK
-- Tokens are sent to contributors immedialty during the crowdsale
+- Tokens are sent to contributors immediately during the crowdsale
 - Funds are saved in a multisig wallet
 - Investors protection in case where the mincap is not reached with a refund period of 45 days
 

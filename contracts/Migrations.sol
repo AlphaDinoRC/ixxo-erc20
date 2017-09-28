@@ -1,25 +1,21 @@
 pragma solidity ^0.4.11;
 
 
-contract Migrations {
-    address public owner;
+import './Ownable.sol';
 
-    uint public last_completed_migration;
+/**
+ * @title Migrations
+ * @dev This is a truffle contract, needed for truffle integration, not meant for use by Zeppelin users.
+ */
+contract Migrations is Ownable {
+    uint256 public lastCompletedMigration;
 
-    modifier restricted() {
-        if (msg.sender == owner) _;
+    function setCompleted(uint256 completed) onlyOwner public {
+        lastCompletedMigration = completed;
     }
 
-    function Migrations() {
-        owner = msg.sender;
-    }
-
-    function setCompleted(uint completed) restricted {
-        last_completed_migration = completed;
-    }
-
-    function upgrade(address new_address) restricted {
-        Migrations upgraded = Migrations(new_address);
-        upgraded.setCompleted(last_completed_migration);
+    function upgrade(address newAddress) onlyOwner public {
+        Migrations upgraded = Migrations(newAddress);
+        upgraded.setCompleted(lastCompletedMigration);
     }
 }

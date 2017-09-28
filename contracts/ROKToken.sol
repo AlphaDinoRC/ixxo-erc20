@@ -45,22 +45,25 @@ contract ROKToken is ERC20, Ownable {
         return true;
     }
 
-    function transfer(address _to, uint _value) returns (bool) {
+    function transfer(address _to, uint256 _value) public returns (bool) {
         require(_to != address(0));
+        require(_value <= balances[msg.sender]);
 
+        // SafeMath.sub will throw if there is not enough balance.
         balances[msg.sender] = balances[msg.sender].sub(_value);
         balances[_to] = balances[_to].add(_value);
         Transfer(msg.sender, _to, _value);
         return true;
     }
 
-    function transferFrom(address _from, address _to, uint _value) returns (bool) {
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
         require(_to != address(0));
-        var _allowance = allowed[_from][msg.sender];
+        require(_value <= balances[_from]);
+        require(_value <= allowed[_from][msg.sender]);
 
         balances[_from] = balances[_from].sub(_value);
         balances[_to] = balances[_to].add(_value);
-        allowed[_from][msg.sender] = _allowance.sub(_value);
+        allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
         Transfer(_from, _to, _value);
         return true;
     }
@@ -69,13 +72,7 @@ contract ROKToken is ERC20, Ownable {
         return balances[_owner];
     }
 
-    function approve(address _spender, uint _value) returns (bool) {
-        // To change the approve amount you first have to reduce the addresses`
-        //  allowance to zero by calling `approve(_spender, 0)` if it is not
-        //  already 0 to mitigate the race condition described here:
-        //  https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
-        require((_value == 0) || (allowed[msg.sender][_spender] == 0));
-
+    function approve(address _spender, uint256 _value) public returns (bool) {
         allowed[msg.sender][_spender] = _value;
         Approval(msg.sender, _spender, _value);
         return true;

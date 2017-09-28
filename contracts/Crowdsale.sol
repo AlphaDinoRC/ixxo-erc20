@@ -75,15 +75,15 @@ contract Crowdsale is Pausable, PullPayment {
         // Require that the incoming amount is at least the minimum purchase size
         require(msg.value >= minimumPurchase);
         // If all checks good, then accept contribution and record new balance
-        balances[msg.sender] += msg.value;
+        balances[msg.sender] = balances[msg.sender].add(msg.value);
         // add the new total balance in Ether
-        savedBalance += msg.value;
+        savedBalance = savedBalance.add(msg.value);
         // Calcul of the ROk tokens amount
         uint Roktoken = rateETH_ROK.mul(msg.value) + getBonus(rateETH_ROK.mul(msg.value));
         // And transfer the tokens to contributor
         require(rok.transfer(msg.sender, Roktoken.mul(80).div(100)));
         // Add the new total balance in ROK
-        savedBalanceToken += Roktoken;
+        savedBalanceToken = savedBalanceToken.add(Roktoken);
         // Log the new contribution!
         Contribution(msg.sender, msg.value, Roktoken.mul(80).div(100));
     }
