@@ -21,12 +21,12 @@ contract Crowdsale is Pausable, PullPayment {
     ROKToken public rok;
 
     address public escrow;                                                                             // Address of Escrow Provider Wallet
-    address public bounty ;                      						      // Address dedicated for bounty services
-    address public team;                       							     // Adress for ROK token allocated to the team
-    uint256 public rateETH_ROK;                                                        		    // Rate Ether per ROK token
-    uint256 public constant minimumPurchase = 0.1 ether;                                           // Minimum purchase size of incoming ETH
-    uint256 public constant maxFundingGoal = 100000 ether;                                        // Maximum goal in Ether raised
-    uint256 public constant minFundingGoal = 18000 ether;                                        // Minimum funding goal in Ether raised
+    address public bounty ;                      // Address dedicated for bounty services
+    address public team;                       // Adress for ROK token allocated to the team
+    uint256 public rateETH_ROK;                                                        // Rate Ether per ROK token
+    uint256 public constant minimumPurchase = 0.1 ether;                                              // Minimum purchase size of incoming ETH
+    uint256 public constant maxFundingGoal = 100000 ether;                                                 // Maximum goal in Ether raised
+    uint256 public constant minFundingGoal = 18000 ether;                                                 // Minimum funding goal in Ether raised
     uint256 public constant startDate = 1509534000;                                                // epoch timestamp representing the start date (1st november 2017 11:00 gmt)
     uint256 public constant deadline = 1512126000;                                                // epoch timestamp representing the end date (1st december 2017 11:00 gmt)
     uint256 public constant refundeadline = 1515927600;                                          // epoch timestamp representing the end date of refund period (14th january 2018 11:00 gmt)
@@ -62,6 +62,7 @@ contract Crowdsale is Pausable, PullPayment {
         rateETH_ROK = 1000;
     }
 
+
     // Default Function, delegates to contribute function (for ease of use)
     // WARNING: Not compatible with smart contract invocation, will exceed gas stipend!
     // Only use from external accounts
@@ -73,8 +74,10 @@ contract Crowdsale is Pausable, PullPayment {
     function contribute(address contributor) internal{
         // Has the crowdsale even started yet?
         assert(isStarted());
+        // Does the crowdsale completed ?
+        assert(!isComplete());
         // Does this payment send us over the max?
-        assert(this.balance <= maxFundingGoal);
+        assert(savedBalance <= maxFundingGoal);
         // Require that the incoming amount is at least the minimum purchase size
         assert(msg.value >= minimumPurchase);
         // If all checks good, then accept contribution and record new balance
@@ -82,7 +85,7 @@ contract Crowdsale is Pausable, PullPayment {
         // add the new total balance in Ether
         savedBalance = savedBalance.add(msg.value);
         // Calcul of the ROk tokens amount
-        uint256 Roktoken = (rateETH_ROK.mul(msg.value))/(1 ether) + getBonus((rateETH_ROK.mul(msg.value)) / (1 ether));
+        uint256 Roktoken = rateETH_ROK.mul(msg.value) + getBonus(rateETH_ROK.mul(msg.value));
         uint256 RokToSend = (Roktoken.mul(80)).div(100);
         // And transfer the tokens to contributor
         rok.transfer(contributor, RokToSend);
@@ -133,16 +136,15 @@ contract Crowdsale is Pausable, PullPayment {
     // Function to check the current Tokens affected to bounty
     function checkRokBounty() constant returns (uint256 totalbounty) {
         return (savedBalanceToken.div(100));
-        // Function to check the current Tokens aFfected for bounty
     }
 
     // Function to check the refund period is over
-    function refundPeriodOver() returns (bool){
+    function refundPeriodOver() constant returns (bool){
         return (now > refundeadline);
     }
 
     // Function to check the refund period is over
-    function refundPeriodStart() returns (bool){
+    function refundPeriodStart() constant returns (bool){
         return (now > deadline);
     }
 
@@ -172,9 +174,9 @@ contract Crowdsale is Pausable, PullPayment {
     function payout() onlyOwner {
         if (isSuccessful() && isComplete()) {
             // We were successful, so transfer the balance to the escrow address
-            escrow.transfer(this.balance);
+            escrow.transfer(savedBalance);
             // Log the payout to escrow
-            PayEther(escrow, this.balance, now);
+            PayEther(escrow, savedBalance, now);
             // And since successful, send Bounty tokens to the dedicated address
             rok.transfer(bounty, checkRokBounty());
             //  Pay team members
@@ -183,9 +185,9 @@ contract Crowdsale is Pausable, PullPayment {
         else {
             if (refundPeriodOver()) {
                 // Transfer the balance to the escrow address
-                escrow.transfer(this.balance);
+                escrow.transfer(savedBalance);
                 // Log the payout to escrow
-                PayEther(escrow, this.balance, now);
+                PayEther(escrow, savedBalance, now);
                 // Send Bounty tokens to the dedicated address
                 rok.transfer(bounty, checkRokBounty());
                 // Pay team members
@@ -196,7 +198,7 @@ contract Crowdsale is Pausable, PullPayment {
 
     //Function to pay Team
     function payTeam() internal {
-        require(checkRokTeam() > 0);
+        assert(checkRokTeam() > 0);
         uint rok_final_team = checkRokTeam();
 
         // Transfert the amount of ROK to the team
@@ -208,6 +210,7 @@ contract Crowdsale is Pausable, PullPayment {
             //Log burn of tokens
             BurnTokens(rok.totalSupply().sub(checkRokSold()), now);
         }
+        rok.unlock();
     }
 
     /* When MIN_CAP is not reach:
@@ -216,13 +219,13 @@ contract Crowdsale is Pausable, PullPayment {
      */
     function refund() public {
         // if the min cap is not reached
-        require(!isSuccessful());
+        assert(!isSuccessful());
         // Refund start period for 45 days
-        require(refundPeriodStart());
+        assert(refundPeriodStart());
         // Refund period is not still reached
-        require(!refundPeriodOver());
+        assert(!refundPeriodOver());
         //  Check if the sender is already a contributor
-        require(balances[msg.sender] != 0);
+        assert(balances[msg.sender] != 0);
         // Check ETH to send
         uint ETHToSend = checkEthBalance(msg.sender);
         balances[msg.sender] = 0;
