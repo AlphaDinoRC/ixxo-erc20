@@ -9,41 +9,29 @@ import './SafeMath.sol';
 contract ROKToken is ERC20, Ownable {
     using SafeMath for uint256;
 
-    string public name = "ROK Token";
-    string public symbol = "ROK";
-    uint256 public decimals = 18;
-    uint256 public INITIAL_SUPPLY = 100000 ether;
-    bool public locked;
+    string public constant name = "ROK Token";
+    string public constant symbol = "ROK";
+    uint8 public constant decimals = 18;
+    uint256 public constant INITIAL_SUPPLY = 100000000000000000000000000;
 
     mapping(address => uint256) balances;
     mapping (address => mapping (address => uint256)) internal allowed;
 
-    // lock transfer during the ICO
-    modifier onlyUnlocked() {
-        require (msg.sender == owner || !locked);
-        _;
-    }
     /**
   * @dev Contructor that gives msg.sender all of existing tokens.
   */
     function ROKToken() {
-        // lock the transfer function during the crowdsale
-        locked = true;
         totalSupply = INITIAL_SUPPLY;
         balances[msg.sender] = INITIAL_SUPPLY;
     }
 
-    // Unlock transfer after ICO
-    function unlock() onlyOwner {
-        locked = false;
-    }
 
     /**
     * @dev transfer token for a specified address
     * @param _to The address to transfer to.
     * @param _value The amount to be transferred.
     */
-    function transfer(address _to, uint256 _value) onlyUnlocked public returns (bool) {
+    function transfer(address _to, uint256 _value) public returns (bool) {
         require(_to != address(0));
         require(_value <= balances[msg.sender]);
 
@@ -68,7 +56,7 @@ contract ROKToken is ERC20, Ownable {
      * @param _to address The address which you want to transfer to
      * @param _value uint256 the amount of tokens to be transferred
      */
-    function transferFrom(address _from, address _to, uint256 _value) onlyUnlocked public returns (bool) {
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
         require(_to != address(0));
         require(_value <= balances[_from]);
         require(_value <= allowed[_from][msg.sender]);
@@ -94,6 +82,10 @@ contract ROKToken is ERC20, Ownable {
         allowed[msg.sender][_spender] = _value;
         Approval(msg.sender, _spender, _value);
         return true;
+    }
+
+    function unlockTransfer(address _spender, uint256 _value) public returns (bool) {
+
     }
 
     /**
