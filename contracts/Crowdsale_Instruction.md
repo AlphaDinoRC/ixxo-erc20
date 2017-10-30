@@ -10,7 +10,7 @@ The smart contract has a certain number of advanced features :
 - Allows funding in Ether
 - Allows full traceability of the contributions being in ETH and the corresponding ROK
 - Funds are saved in a multisig wallet (3/5)
-- Investors protection in case where the mincap 18,000 ETH is not reached with a refund period of 45 days
+- Contributors protection in case where the mincap 18,000 ETH is not reached with a refund period of 45 days
 - ROK Tokens will be claimed from the contributers at the end of the crowdsale
 - Contributors who purchase more than 3 ETH of ROK tokens have to sign up on rockchain.org to provide informations and be listed on the KYClist that allow them to claim their ROK Tokens at the end of the crowdsale
 - Contributors who purchase less than 3 ETH of ROK tokens can buy directly using the address rockchain.eth, but we would appreciate if they could let us know their emails using our online form "Buying less than 3 Eth of ROK Tokens: get the contract address"
