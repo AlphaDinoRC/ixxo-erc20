@@ -3,7 +3,7 @@
 Rockchain, the Ethereum data privacy protocols is described on www.rockchain.org
 
 Abstract:
-Rockchain is a second infrastructure layer on top of Ethereum for managing data pricacy. Its dAppBox is a data firewall whose rules are defined in Ethereum smart contract. This dappBox is open to computations that don't breach the data privacy.
+Rockchain is a second infrastructure layer on top of Ethereum for managing data privacy. Its dAppBox is a data firewall whose rules are defined in Ethereum smart contract. This dappBox is open to computations that don't breach the data privacy.
 
 
 Crowdsale contract:
